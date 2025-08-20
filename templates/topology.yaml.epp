@@ -1,0 +1,15 @@
+name: <%= $topology['name'] %>
+prefix: ""
+topology:
+  kinds:
+<% $topology['kinds'].each | $kind_name, $kind | { -%>
+    <%= $kind_name %>:
+      image: <%= "${kind['image']}:${kind['tag']}" %>
+<% } -%>
+  nodes:
+<% $topology['nodes'].each | $node_name, $n | { -%>
+    <%= $node_name %>:
+      kind: <%= $n['kind'] %>
+<% } -%>
+  links:
+    - endpoints: ["<%= join($topology['endpoints'],'","') %>"]
