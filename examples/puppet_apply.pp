@@ -17,6 +17,7 @@ archive { "/tmp/${image_filename}":
   source      => $image_source,
   digest_type => 'sha512',
   digest_url  => $image_checksum_url,
+  before      => Class['containerlab'],
 }
 
 # Apply the containerlab class with specific parameters

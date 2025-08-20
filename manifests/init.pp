@@ -55,6 +55,7 @@ class containerlab (
   Hash $image_imports = {},
   Hash $topologies = {},
 ) {
+  # Install ContainerLab
   if $manage_install {
     exec { 'install_containerlab':
       command => $install_string,
@@ -62,6 +63,7 @@ class containerlab (
       creates => '/usr/bin/containerlab',
     }
   }
+
   # Import defined container images
   if $manage_image_imports {
     $image_imports.each |$name, $params| {
@@ -89,10 +91,14 @@ class containerlab (
         content => epp('containerlab/topology.yaml.epp', { 'topology' => $topology }),
         require => Exec['install_containerlab'],
       }
-
+      # Note that this will currently only deploy the topology if it does not already exist
+      # --replace functionality on topology file update may be implemented in the future
+      # Currently, to update a topology, you would need to delete the existing one first
+      # using `containerlab destroy -t <topology_file>` and then reapply the manifest.
       exec { "apply_containerlab_topology_${name}":
         command => "containerlab deploy -t ${topology_file}",
         path    => '/usr/local/bin:/usr/bin:/bin',
+        onlyif  => "containerlab inspect --name ${topology['name']} 2>&1 | grep \"no containers found\"",
         require => File[$topology_file],
       }
     }
